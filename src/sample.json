@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "nombres": "Noe Alejandro",
+        "apellidos": "Gonzalez Bautista",
+        "matricula": "18016311",
+        "promedio": 91.4
+    },
+    {
+        "id": 2,
+        "nombres": "Jessica Sarai",
+        "apellidos": "Gonzalez Bautista",
+        "matricula": "16016252",
+        "promedio": 86.0
+    }
+]
