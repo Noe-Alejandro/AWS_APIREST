@@ -24,12 +24,12 @@ router.get('/profesores/:id', (req, res) =>{
 });
 
 router.post('/profesores', (req, res) =>{
-    const { nombres, apellidos, matricula, promedio} = req.body;
-    if(!IsNotNull([nombres, apellidos, matricula, promedio])){
+    const { numeroEmpleado, nombres, apellidos, horasClase} = req.body;
+    if(!IsNotNull([numeroEmpleado, nombres, apellidos, horasClase])){
         res.status(400).json({error: 'Invalid request'});
         return;
     }
-    if(!IsNumberType([promedio]) || !IsStringType([nombres, apellidos, matricula])){
+    if(!IsNumberType([numeroEmpleado, horasClase]) || !IsStringType([nombres, apellidos])){
         res.status(400).json({error: 'Invalid data type in request'});
         return;
     }
@@ -43,31 +43,35 @@ router.post('/profesores', (req, res) =>{
 
 router.put('/profesores/:id', (req, res) =>{
     const { id } = req.params;
-    const { nombres, apellidos, matricula, promedio} = req.body;
+    const { numeroEmpleado, nombres, apellidos, horasClase} = req.body;
     if(!IsOnlyNumber(id)){
         res.status(400).json({error: 'Invalid id'});
         return;
     }
-    if(!IsNotNull([nombres, apellidos, matricula, promedio])){
+    if(!IsNotNull([numeroEmpleado, nombres, apellidos, horasClase])){
         res.status(400).json({error: 'Invalid request'});
         return;
     }
-    if(!IsNumberType([promedio]) || !IsStringType([nombres, apellidos, matricula])){
+    if(!IsNumberType([numeroEmpleado, horasClase]) || !IsStringType([nombres, apellidos, matricula])){
         res.status(400).json({error: 'Invalid data type in request'});
         return;
     }
 
     for(var i = 0; i<profesores.length; i++){
         if(profesores[i].id == id){
+            profesores[i].numeroEmpleado = numeroEmpleado;
             profesores[i].nombres = nombres;
             profesores[i].apellidos = apellidos;
-            profesores[i].matricula = matricula;
-            profesores[i].promedio = promedio;
-            res.status(201).json({msg: 'Student updated'});
+            profesores[i].horasClase = horasClase;
+            res.status(200).json({msg: 'Student updated'});
             return;
         }
     }
     res.status(404).json({error: 'Student not found'});
+});
+
+router.delete('/alumnos', (req, res) =>{
+    res.status(405).json({error : 'Not allowed'});
 });
 
 router.delete('/profesores/:id', (req, res) =>{

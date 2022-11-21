@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 const _ = require('underscore');
-const alumnos = require('../sample.json');
+const alumnos = []
 var alumnosIndex = alumnos.length;
 
 router.get('/alumnos', (req, res) =>{
@@ -63,11 +63,15 @@ router.put('/alumnos/:id', (req, res) =>{
             alumnos[i].apellidos = apellidos;
             alumnos[i].matricula = matricula;
             alumnos[i].promedio = promedio;
-            res.status(201).json({msg: 'Student updated'});
+            res.status(200).json({msg: 'Student updated'});
             return;
         }
     }
     res.status(404).json({error: 'Student not found'});
+});
+
+router.delete('/alumnos', (req, res) =>{
+    res.status(405).json({error : 'Not allowed'});
 });
 
 router.delete('/alumnos/:id', (req, res) =>{
