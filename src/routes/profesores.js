@@ -5,14 +5,18 @@ const profesores = [];
 var profesoresIndex = profesores.length;
 
 router.get('/profesores', (req, res) =>{
-    res.json(profesores);
+    res.status(200).json(profesores);
 });
 
 router.get('/profesores/:id', (req, res) =>{
     const { id } = req.params;
+    if(!IsOnlyNumber(id)){
+        res.status(400).json({error: 'Invalid id'});
+        return;
+    }
     for(var i = 0; i<profesores.length; i++){
         if(profesores[i].id == id){
-            res.json(profesores[i]);
+            res.status(200).json(profesores[i]);
             return;
         }
     }
@@ -20,40 +24,59 @@ router.get('/profesores/:id', (req, res) =>{
 });
 
 router.post('/profesores', (req, res) =>{
-    const { numeroEmpleado, nombres, apellidos, horasClase} = req.body;
-    if(numeroEmpleado && nombres && apellidos && horasClase){
-        profesoresIndex += 1;
-        const id = profesoresIndex;
-        const newProfesor = {id, ...req.body};
-        profesores.push(newProfesor);
-        res.status(201).json(profesores);
-    }else{
-        res.status(404).json({error: 'There was an error'});
+    const { nombres, apellidos, matricula, promedio} = req.body;
+    if(!IsNotNull([nombres, apellidos, matricula, promedio])){
+        res.status(400).json({error: 'Invalid request'});
+        return;
     }
+    if(!IsNumberType([promedio]) || !IsStringType([nombres, apellidos, matricula])){
+        res.status(400).json({error: 'Invalid data type in request'});
+        return;
+    }
+    
+    profesoresIndex += 1;
+    const id = profesoresIndex;
+    const newProfesores = {id, ...req.body};
+    profesores.push(newProfesores);
+    res.status(201).json(profesores);
 });
 
 router.put('/profesores/:id', (req, res) =>{
     const { id } = req.params;
-    const { numeroEmpleado, nombres, apellidos, horasClase} = req.body;
-    if(numeroEmpleado && nombres && apellidos && horasClase){
-        for(var i = 0; i<profesores.length; i++){
-            if(profesores[i].id == id){
-                profesores[i].nombres = nombres;
-                profesores[i].apellidos = apellidos;
-                profesores[i].matricula = matricula;
-                profesores[i].promedio = promedio;
-                res.status(201).json({msg: 'Student updated'});
-                return;
-            }
-        }
-        res.status(404).json({error: 'Student not found'});
-    }else{
-        res.status(400).json({error: 'There was an error'});
+    const { nombres, apellidos, matricula, promedio} = req.body;
+    if(!IsOnlyNumber(id)){
+        res.status(400).json({error: 'Invalid id'});
+        return;
     }
+    if(!IsNotNull([nombres, apellidos, matricula, promedio])){
+        res.status(400).json({error: 'Invalid request'});
+        return;
+    }
+    if(!IsNumberType([promedio]) || !IsStringType([nombres, apellidos, matricula])){
+        res.status(400).json({error: 'Invalid data type in request'});
+        return;
+    }
+
+    for(var i = 0; i<profesores.length; i++){
+        if(profesores[i].id == id){
+            profesores[i].nombres = nombres;
+            profesores[i].apellidos = apellidos;
+            profesores[i].matricula = matricula;
+            profesores[i].promedio = promedio;
+            res.status(201).json({msg: 'Student updated'});
+            return;
+        }
+    }
+    res.status(404).json({error: 'Student not found'});
 });
 
 router.delete('/profesores/:id', (req, res) =>{
     const { id } = req.params;
+    if(!IsOnlyNumber(id)){
+        res.status(400).json({error: 'Invalid id'});
+        return;
+    }
+    
     for(var i = 0; i<profesores.length; i++){
         if(profesores[i].id == id){
             profesores.splice(i, 1);
@@ -63,5 +86,36 @@ router.delete('/profesores/:id', (req, res) =>{
     }
     res.status(404).json({error : 'Student not found'});
 });
+
+function IsOnlyNumber(str){
+    return /^[0-9]+$/.test(str);
+}
+
+function IsNotNull(array){
+    for(var i = 0; i<array.length; i++){
+        if(array[i] == null){
+            return false;
+        }
+    }
+    return true;
+}
+
+function IsNumberType(array){
+    for(var i = 0; i<array.length; i++){
+        if(typeof(array[i]) != "number"){
+            return false;
+        } 
+    }
+    return true;
+}
+
+function IsStringType(array){
+    for(var i = 0; i<array.length; i++){
+        if(typeof(array[i]) != "string"){
+            return false;
+        } 
+    }
+    return true;
+}
 
 module.exports = router;

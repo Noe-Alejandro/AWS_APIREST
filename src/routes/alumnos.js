@@ -1,5 +1,4 @@
 const { Router } = require('express');
-const { isString } = require('underscore');
 const router = Router();
 const _ = require('underscore');
 const alumnos = require('../sample.json');
