@@ -10,11 +10,13 @@ router.get('/alumnos', (req, res) =>{
 
 router.get('/alumnos/:id', (req, res) =>{
     const { id } = req.params;
-    _.each(alumnos, (alumno, i) =>{
-        if(alumno.id == id){
-            res.json(alumno);
+    for(var i = 0; i<alumnos.length; i++){
+        if(alumnos[i].id == id){
+            res.json(alumnos[i]);
+            return;
         }
-    });
+    }
+    res.status(404).json({error: 'Student not found'});
 });
 
 router.post('/alumnos', (req, res) =>{
@@ -26,7 +28,7 @@ router.post('/alumnos', (req, res) =>{
         alumnos.push(newAlumno);
         res.status(201).json(alumnos);
     }else{
-        res.status(404).json({error: 'There was an error'});
+        res.status(400).json({error: 'Invalid request'});
     }
 });
 
@@ -34,30 +36,32 @@ router.put('/alumnos/:id', (req, res) =>{
     const { id } = req.params;
     const { nombres, apellidos, matricula, promedio} = req.body;
     if(nombres && apellidos && matricula && promedio){
-        _.each(alumnos, (alumno, i) =>{
-            if(alumno.id == id){
-                alumno.nombres = nombres;
-                alumno.apellidos = apellidos;
-                alumno.matricula = matricula;
-                alumno.promedio = promedio;
-                res.json({msg: 'Student updated'});
+        for(var i = 0; i<alumnos.length; i++){
+            if(alumnos[i].id == id){
+                alumnos[i].nombres = nombres;
+                alumnos[i].apellidos = apellidos;
+                alumnos[i].matricula = matricula;
+                alumnos[i].promedio = promedio;
+                res.status(201).json({msg: 'Student updated'});
+                return;
             }
-        });
+        }
+        res.status(404).json({error: 'Student not found'});
     }else{
-        res.status(404).json({error: 'There was an error'});
+        res.status(400).json({error: 'There was an error'});
     }
 });
 
 router.delete('/alumnos/:id', (req, res) =>{
     const { id } = req.params;
-    var index = 0;
-    _.each(alumnos, (alumno, i) =>{
-        if(alumno.id == id){
-            index = i;
+    for(var i = 0; i<alumnos.length; i++){
+        if(alumnos[i].id == id){
+            alumnos.splice(i, 1);
             res.json({msg: 'Student deleted'});
+            return;
         }
-    });
-    alumnos.splice(index, 1);
+    }
+    res.status(404).json({error : 'Student not found'});
 });
 
 module.exports = router;
