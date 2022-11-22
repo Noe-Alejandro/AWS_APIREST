@@ -52,7 +52,7 @@ router.put('/profesores/:id', (req, res) =>{
         res.status(400).json({error: 'Invalid request'});
         return;
     }
-    if(!IsNumberType([numeroEmpleado, horasClase]) || !IsStringType([nombres, apellidos, matricula])){
+    if(!IsNumberType([numeroEmpleado, horasClase]) || !IsStringType([nombres, apellidos])){
         res.status(400).json({error: 'Invalid data type in request'});
         return;
     }
@@ -70,7 +70,7 @@ router.put('/profesores/:id', (req, res) =>{
     res.status(404).json({error: 'Student not found'});
 });
 
-router.delete('/alumnos', (req, res) =>{
+router.delete('/profesores', (req, res) =>{
     res.status(405).json({error : 'Not allowed'});
 });
 
