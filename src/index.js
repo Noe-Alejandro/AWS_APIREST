@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+
 const app = express();
 
 //Settings
@@ -15,7 +16,11 @@ app.use(express.json());
 app.use(require('./routes/alumnos'));
 app.use(require('./routes/profesores'));
 
+const db = require('../models');
+
+db.sequelize.sync().then((req) => {
 //Starting Server
-app.listen(app.get('port'), () =>{
-    console.log(`Server on port ${app.get('port')}`);
+    app.listen(app.get('port'), () =>{
+        console.log(`Server on port ${app.get('port')}`);
+    });
 });

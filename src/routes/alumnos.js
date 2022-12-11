@@ -1,11 +1,13 @@
 const { Router } = require('express');
+const { renameSync } = require('fs');
 const router = Router();
 const _ = require('underscore');
-const alumnos = []
-var alumnosIndex = alumnos.length;
+const { alumnos } = require('../../models');
 
 router.get('/alumnos', (req, res) =>{
-    res.status(200).json(alumnos);
+    alumnos.findAll().then((users) =>{
+        res.send(users);
+    });
 });
 
 router.get('/alumnos/:id', (req, res) =>{
@@ -16,8 +18,10 @@ router.get('/alumnos/:id', (req, res) =>{
     }
     for(var i = 0; i<alumnos.length; i++){
         if(alumnos[i].id == id){
-            res.status(200).json(alumnos[i]);
-            return;
+            alumnos.findByPk(id).then((user => {
+                res.status(200).json(user);
+                return;
+            }));
         }
     }
     res.status(404).json({error: 'Student not found'});
@@ -34,16 +38,25 @@ router.post('/alumnos', (req, res) =>{
         return;
     }
     
-    alumnosIndex += 1;
-    const id = alumnosIndex;
-    const newAlumno = {id, ...req.body};
-    alumnos.push(newAlumno);
-    res.status(201).json(alumnos);
+    const newAlumno = { ...req.body};
+    alumnos.create({
+        nombres: newAlumno.nombres,
+        apellidos: newAlumno.apellidos,
+        matricula: newAlumno.matricula,
+        promedio: newAlumno.promedio,
+        fotoPerfilUrl: newAlumno.fotoPerfilUrl
+    })
+    .then((user) =>{
+        res.status(201).json(user);
+    })
+    .catch(err => {
+        res.status(500).json({error: err});
+    });
 });
 
 router.put('/alumnos/:id', (req, res) =>{
     const { id } = req.params;
-    const { nombres, apellidos, matricula, promedio} = req.body;
+    const { nombres, apellidos, matricula, promedio, fotoPerfilUrl} = req.body;
     if(!IsOnlyNumber(id)){
         res.status(400).json({error: 'Invalid id'});
         return;
@@ -57,17 +70,24 @@ router.put('/alumnos/:id', (req, res) =>{
         return;
     }
 
-    for(var i = 0; i<alumnos.length; i++){
-        if(alumnos[i].id == id){
-            alumnos[i].nombres = nombres;
-            alumnos[i].apellidos = apellidos;
-            alumnos[i].matricula = matricula;
-            alumnos[i].promedio = promedio;
-            res.status(200).json({msg: 'Student updated'});
+    alumnos.findByPk(id)
+    .then((user => {
+        if(!user){
+            res.status(404).json({error: 'Student not found'});
             return;
+        }else{
+            user.update({
+                nombres: nombres,
+                apellidos: apellidos,
+                matricula: matricula,
+                promedio: promedio,
+                fotoPerfilUrl: fotoPerfilUrl
+            })
+            .then(() =>{
+                res.status(200).json({msg: 'Student updated'});
+            });
         }
-    }
-    res.status(404).json({error: 'Student not found'});
+    }));
 });
 
 router.delete('/alumnos', (req, res) =>{
@@ -81,14 +101,16 @@ router.delete('/alumnos/:id', (req, res) =>{
         return;
     }
     
-    for(var i = 0; i<alumnos.length; i++){
-        if(alumnos[i].id == id){
-            alumnos.splice(i, 1);
-            res.json({msg: 'Student deleted'});
-            return;
+    alumnos.findByPk(id)
+    .then((user => {
+        if(!user){
+            res.status(404).json({error : 'Student not found'});
+        }else{
+            user.destroy().then(() =>{
+                res.json({msg: 'Student deleted'});
+            });
         }
-    }
-    res.status(404).json({error : 'Student not found'});
+    }));
 });
 
 function IsOnlyNumber(str){
