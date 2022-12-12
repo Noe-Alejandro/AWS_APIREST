@@ -1,11 +1,12 @@
 const { Router } = require('express');
 const router = Router();
 const _ = require('underscore');
-const profesores = [];
-var profesoresIndex = profesores.length;
+const { profesores } = require('../../models');
 
 router.get('/profesores', (req, res) =>{
-    res.status(200).json(profesores);
+    profesores.findAll().then((user) =>{
+        res.status(200).json(user);
+    });
 });
 
 router.get('/profesores/:id', (req, res) =>{
@@ -14,13 +15,14 @@ router.get('/profesores/:id', (req, res) =>{
         res.status(400).json({error: 'Invalid id'});
         return;
     }
-    for(var i = 0; i<profesores.length; i++){
-        if(profesores[i].id == id){
-            res.status(200).json(profesores[i]);
+    profesores.findByPk(id).then((user => {
+        if(!user){
+            res.status(404).json({error: 'Teacher not found'});
+        }else{
+            res.status(200).json(user);
             return;
         }
-    }
-    res.status(404).json({error: 'Student not found'});
+    }));
 });
 
 router.post('/profesores', (req, res) =>{
@@ -34,11 +36,19 @@ router.post('/profesores', (req, res) =>{
         return;
     }
     
-    profesoresIndex += 1;
-    const id = profesoresIndex;
-    const newProfesores = {id, ...req.body};
-    profesores.push(newProfesores);
-    res.status(201).json(profesores);
+    const newProfesores = {...req.body};
+    profesores.create({
+        nombres: newProfesores.nombres,
+        apellidos: newProfesores.apellidos,
+        numeroEmpleado: newProfesores.numeroEmpleado,
+        horasClase: newProfesores.horasClase
+    })
+    .then((user) =>{
+        res.status(201).json(user);
+    })
+    .catch(err => {
+        res.status(500).json({error: err});
+    });
 });
 
 router.put('/profesores/:id', (req, res) =>{
@@ -57,17 +67,23 @@ router.put('/profesores/:id', (req, res) =>{
         return;
     }
 
-    for(var i = 0; i<profesores.length; i++){
-        if(profesores[i].id == id){
-            profesores[i].numeroEmpleado = numeroEmpleado;
-            profesores[i].nombres = nombres;
-            profesores[i].apellidos = apellidos;
-            profesores[i].horasClase = horasClase;
-            res.status(200).json({msg: 'Student updated'});
+    profesores.findByPk(id)
+    .then((user => {
+        if(!user){
+            res.status(404).json({error: 'Teacher not found'});
             return;
+        }else{
+            user.update({
+                nombres: nombres,
+                apellidos: apellidos,
+                numeroEmpleado: numeroEmpleado,
+                horasClase: horasClase
+            })
+            .then(() =>{
+                res.status(200).json({msg: 'Teacher updated'});
+            });
         }
-    }
-    res.status(404).json({error: 'Student not found'});
+    }));
 });
 
 router.delete('/profesores', (req, res) =>{
@@ -81,14 +97,16 @@ router.delete('/profesores/:id', (req, res) =>{
         return;
     }
     
-    for(var i = 0; i<profesores.length; i++){
-        if(profesores[i].id == id){
-            profesores.splice(i, 1);
-            res.json({msg: 'Student deleted'});
-            return;
+    profesores.findByPk(id)
+    .then((user => {
+        if(!user){
+            res.status(404).json({error : 'Teacher not found'});
+        }else{
+            user.destroy().then(() =>{
+                res.json({msg: 'Teacher deleted'});
+            });
         }
-    }
-    res.status(404).json({error : 'Student not found'});
+    }));
 });
 
 function IsOnlyNumber(str){

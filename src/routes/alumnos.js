@@ -16,15 +16,14 @@ router.get('/alumnos/:id', (req, res) =>{
         res.status(400).json({error: 'Invalid id'});
         return;
     }
-    for(var i = 0; i<alumnos.length; i++){
-        if(alumnos[i].id == id){
-            alumnos.findByPk(id).then((user => {
-                res.status(200).json(user);
-                return;
-            }));
+    alumnos.findByPk(id).then((user => {
+        if(!user){
+            res.status(404).json({error: 'Student not found'});
+        }else{
+            res.status(200).json(user);
+            return;
         }
-    }
-    res.status(404).json({error: 'Student not found'});
+    }));
 });
 
 router.post('/alumnos', (req, res) =>{
